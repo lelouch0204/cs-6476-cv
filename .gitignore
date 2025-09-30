@@ -1,0 +1,123 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments / conda envs
+env/
+venv/
+.venv/
+ENV/
+.ENV/
+venv.bak/
+venv-win/
+conda-env/
+*.conda
+/.conda/
+anaconda3/
+Miniconda3/
+envs/
+# Keep environment.yml / requirements.txt tracked
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+pytestdebug.log
+
+# Jupyter
+.ipynb_checkpoints
+# (Keep .ipynb files; only checkpoints ignored)
+
+# VS Code / IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Secrets / env files
+.env
+.env.local
+secrets.yml
+*.pem
+*.key
+
+# Archives / build artifacts
+*.zip
+*.tar.gz
+*.tar
+*.rar
+
+# Ignore python egg/built artifacts
+__pycache__/
+*.egg-info/
+*.egg
+
+# Misc
+node_modules/
+.cache/
+*.bak
+*.swp
+
+slides/
+project-0-student/
+
+data/
+data/**
+results/
+results/**
+docs/*.pptx
+docs/*.pdf
+
+# Common image/video formats (if you don't want to track them)
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+*.mov
+*.mp4
+
+# Compressed submissions / backups
+*.zip
+*.tar.gz
