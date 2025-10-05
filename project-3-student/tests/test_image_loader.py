@@ -21,6 +21,8 @@ def test_dataset_length():
         transform=get_fundamental_transforms(inp_size=(64, 64)),
     )
 
+    print("root dir:", f"{PROJ_ROOT}/data/")
+
     assert train_image_loader.__len__() == 2985
     assert test_image_loader.__len__() == 1500
 
