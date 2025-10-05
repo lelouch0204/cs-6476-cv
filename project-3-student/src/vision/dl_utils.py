@@ -30,10 +30,8 @@ def compute_accuracy(logits: torch.Tensor, labels: torch.Tensor) -> float:
     # Student code begin
     ############################################################################
 
-    raise NotImplementedError(
-        "`compute_accuracy` function in "
-        + "`dl_utils.py` needs to be implemented"
-    )
+    predicted_classes = torch.argmax(logits, dim=1)
+    batch_accuracy = (predicted_classes == labels).float().mean().item()
 
     ############################################################################
     # Student code end
@@ -65,10 +63,10 @@ def compute_loss(
     # Student code begin
     ############################################################################
 
-    raise NotImplementedError(
-        "`compute_loss` function in "
-        + "`dl_utils.py` needs to be implemented"
-    )
+    loss = model.loss_criterion(model_output, target_labels)
+
+    if is_normalize:
+        loss = loss / model_output.size(0)
 
     ############################################################################
     # Student code end
@@ -95,10 +93,8 @@ def compute_multilabel_accuracy(logits: torch.Tensor, labels: torch.Tensor) -> f
     # Student code begin
     ############################################################################
 
-    raise NotImplementedError(
-        "`compute_multilabel_accuracy` function in "
-        + "`dl_utils.py` needs to be implemented"
-    )
+    predicted_labels = (torch.sigmoid(logits) >= 0.5).float()
+    batch_accuracy = (predicted_labels == labels).float().mean().item()
 
     ############################################################################
     # Student code end

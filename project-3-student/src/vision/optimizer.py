@@ -34,10 +34,16 @@ def get_optimizer(
     # Student code begin
     ############################################################################
 
-    raise NotImplementedError(
-            "`get_optimizer` function in "
-            + "`optimizer.py` needs to be implemented"
+    if optimizer_type == "sgd":
+        optimizer = torch.optim.SGD(
+            model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
+    elif optimizer_type == "adam":
+        optimizer = torch.optim.Adam(
+            model.parameters(), lr=learning_rate, weight_decay=weight_decay
+        )
+    else:
+        raise ValueError(f"Unsupported optimizer type: {optimizer_type}")
 
     ############################################################################
     # Student code end

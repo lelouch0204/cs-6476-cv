@@ -20,10 +20,22 @@ class SimpleNet(nn.Module):
         # Student code begin
         ############################################################################
 
-        raise NotImplementedError(
-            "`__init__` function in "
-            + "`simple_net.py` needs to be implemented"
+        self.conv_layers = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=10, kernel_size=5, stride=1, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3),
+            nn.Conv2d(in_channels=10, out_channels=20, kernel_size=5, stride=1, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3),
+            nn.Flatten()
         )
+
+        self.fc_layers = nn.Sequential(
+            nn.Linear(in_features=20 * 5 * 5, out_features=100),
+            nn.Linear(in_features=100, out_features=15)
+        )
+
+        self.loss_criterion = nn.CrossEntropyLoss(reduction='mean')
 
         ############################################################################
         # Student code end
@@ -43,10 +55,8 @@ class SimpleNet(nn.Module):
         # Student code begin
         ############################################################################
         
-        raise NotImplementedError(
-            "`forward` function in "
-            + "`simple_net.py` needs to be implemented"
-        )
+        x = self.conv_layers(x)
+        model_output = self.fc_layers(x)
 
         ############################################################################
         # Student code end

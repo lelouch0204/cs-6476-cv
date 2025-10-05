@@ -70,6 +70,7 @@ class Trainer:
         self.train_dataset = ImageLoader(
             data_dir, split="train", transform=train_data_transforms
         )
+        print(f"Number of training examples: {len(self.train_dataset)}")
         self.train_loader = DataLoader(
             self.train_dataset, batch_size=batch_size, shuffle=True, **dataloader_args
         )
