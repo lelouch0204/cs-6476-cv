@@ -31,7 +31,6 @@ def compute_mean_and_std(dir_name: str) -> Tuple[float, float]:
     ############################################################################
 
     image_paths = glob.glob(os.path.join(dir_name, '**', '*.jpg'), recursive=True)
-    print(f"Found {len(image_paths)} images in {dir_name}")
     pixel_values = []
 
     for image_path in image_paths:

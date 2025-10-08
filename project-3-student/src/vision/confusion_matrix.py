@@ -44,10 +44,24 @@ def generate_confusion_data(
     # Student code begins here
     ##########################################################################
 
-    raise NotImplementedError(
-        "`generate_confusion_data` function in "
-        + "`confusion_matrix.py` needs to be implemented"
-    )
+    all_preds = []
+    all_targets = []
+    for _, (inp, target) in enumerate(loader):
+        if use_cuda:
+            inp = inp.cuda()
+            model = model.cuda()
+            target = target.cuda()
+        
+        logits = model(inp)
+        p = torch.argmax(logits, dim=1)
+        all_preds.append(p)
+        all_targets.append(target)
+
+    preds = torch.cat(all_preds, dim=0)
+    targets = torch.cat(all_targets, dim=0)
+
+    for label, idx in label_to_idx.items():
+        class_labels[idx] = label
 
     ##########################################################################
     # Student code ends here
@@ -98,10 +112,7 @@ def generate_confusion_matrix(
         # Student code begins here
         ##########################################################################
     
-        raise NotImplementedError(
-            "`generate_confusion_matrix` function in "
-            + "`confusion_matrix.py` needs to be implemented"
-        )
+        confusion_matrix[target, prediction] += 1
         
         ##########################################################################
         # Student code ends here
@@ -112,10 +123,8 @@ def generate_confusion_matrix(
         # Student code begins here
         ##########################################################################
     
-        raise NotImplementedError(
-            "`generate_confusion_matrix` function in "
-            + "`confusion_matrix.py` needs to be implemented"
-        )
+        row_sums = confusion_matrix.sum(axis=1, keepdims=True)
+        confusion_matrix = confusion_matrix / row_sums
     
         ##########################################################################
         # Student code ends here
