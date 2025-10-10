@@ -31,16 +31,21 @@ def compute_mean_and_std(dir_name: str) -> Tuple[float, float]:
     ############################################################################
 
     image_paths = glob.glob(os.path.join(dir_name, '**', '*.jpg'), recursive=True)
-    pixel_values = []
-
+    pixel_sum = 0.0
+    pixel_sq_sum = 0.0
+    total_pixels = 0
+    
     for image_path in image_paths:
-        image = Image.open(image_path).convert('L') 
-        image_array = np.array(image) / 255.0  
-        pixel_values.extend(image_array.flatten())
-
-    pixel_values = np.array(pixel_values)
-    mean = float(np.mean(pixel_values))
-    std = float(np.std(pixel_values))  
+        image = Image.open(image_path).convert('L')
+        image_array = np.array(image, dtype=np.float32) / 255.0
+        
+        pixel_sum += image_array.sum()
+        pixel_sq_sum += (image_array ** 2).sum()
+        total_pixels += image_array.size
+    
+    mean = float(pixel_sum / total_pixels)
+    variance = (pixel_sq_sum / total_pixels) - (mean ** 2)
+    std = float(np.sqrt(variance))
 
     ############################################################################
     # Student code end

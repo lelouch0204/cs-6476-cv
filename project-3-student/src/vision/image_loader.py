@@ -258,14 +258,22 @@ class MultiLabelImageLoader(data.Dataset):
         df = pd.read_csv(self.labels_csv, names=columns, header=None)
         df = df[df['class_name'].isin(valid_classes)]
 
-        img_paths = [
-            (
-                os.path.join(self.curr_folder, row['class_name'], row['image']),
-                torch.tensor(row[columns].values, dtype=torch.float32)
-            )
-            for _, row in df.iterrows()
-            if os.path.isfile(os.path.join(self.curr_folder, row['class_name'], row['image']))
-        ]
+        for _, row in df.iterrows():
+            class_name = row['class_name']
+            img_file = row['image']
+            img_path = os.path.join(self.curr_folder, class_name, img_file)
+
+            if os.path.isfile(img_path):
+                labels = torch.tensor([
+                    row['clouds'],
+                    row['water_body'],
+                    row['people'],
+                    row['animals'],
+                    row['natural'],
+                    row['manmade'],
+                    row['vehicles'],
+                ], dtype=torch.float32)
+                img_paths.append((img_path, labels))
 
         ############################################################################
         # Student code end
