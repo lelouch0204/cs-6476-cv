@@ -33,7 +33,57 @@ def get_model_and_optimizer(args) -> Tuple[nn.Module, torch.optim.Optimizer]:
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    
+    params_list = []
+
+    if args.arch == "pspnet":
+        model = PSPNet(
+            num_classes=args.num_classes,
+            zoom_factor=args.zoom_factor,
+            pretrained=args.pretrained,
+        )
+
+        params_list.append(
+            {
+                "params": model.backbone.layer0.parameters() + model.backbone.layer1.parameters(),
+                "lr": args.base_lr,
+                "weight_decay": args.weight_decay,
+                "momentum": args.momentum,
+            }
+        )
+
+        for i in range(2, 5):
+            params_list.append(
+                {
+                    "params": getattr(model.backbone, f"layer{i}").parameters(),
+                    "lr": args.base_lr,
+                    "weight_decay": args.weight_decay,
+                    "momentum": args.momentum,
+                }
+            )
+
+        faster_lr_params = [
+            model.ppm.parameters(),
+            model.aux.parameters(),
+            model.cls.parameters(),
+        ]
+
+        for param in faster_lr_params:
+            params_list.append(
+                {
+                    "params": param,
+                    "lr": args.base_lr * 10,
+                    "weight_decay": args.weight_decay,
+                    "momentum": args.momentum,
+                }
+            )
+
+        optimizer = torch.optim.SGD(params=params_list, lr=args.base_lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    elif args.arch == "simple_segmentation_net":
+        model = SimpleSegmentationNet(
+            n_classes=args.num_classes,
+            backbone=args.backbone,
+            pretrained=True
+        )
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -109,8 +159,28 @@ def get_train_transform(args) -> transform.Compose:
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_train_transform()` function in ' +
-        '`part3_training_utils.py` needs to be implemented')
+    transforms_list = [
+        transform.ResizeShort(size=args.short_size),
+        transform.RandomHorizontalFlip(),
+        transform.RandomGaussianBlur(),
+        transform.RandRotate(
+            rotate=(args.rotate_min, args.rotate_max),
+            padding=mean
+        ),
+        transform.RandScale(
+            scale=(args.scale_min, args.scale_max)
+        ),
+        transform.Crop(
+            size=(args.train_h, args.train_w),
+            crop_type="rand",
+            padding=mean,
+            ignore_label=args.ignore_label
+        ),
+        transform.ToTensor(),
+        transform.Normalize(mean=mean, std=std)
+    ]
+
+    train_transform = transform.Compose(transforms_list)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -145,8 +215,19 @@ def get_val_transform(args) -> transform.Compose:
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`get_val_transform()` function in ' +
-        '`part3_training_utils.py` needs to be implemented')
+    transforms_list = [
+        transform.ResizeShort(size=args.short_size),
+        transform.Crop(
+            size=(args.train_h, args.train_w),
+            crop_type="center",
+            padding=mean,
+            ignore_label=args.ignore_label
+        ),
+        transform.ToTensor(),
+        transform.Normalize(mean=mean, std=std)
+    ]
+
+    val_transform = transform.Compose(transforms_list)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
