@@ -27,12 +27,17 @@ class SimpleNet(nn.Module):
             nn.Conv2d(in_channels=10, out_channels=20, kernel_size=5, stride=1, padding=0),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3),
+            nn.Conv2d(in_channels=20, out_channels=40, kernel_size=3, stride=1, padding=1),
+            # nn.BatchNorm2d(num_features=40),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(p=0.5),
             nn.Flatten()
         )
 
         self.fc_layers = nn.Sequential(
-            nn.Linear(in_features=20 * 5 * 5, out_features=100),
-            nn.Linear(in_features=100, out_features=15)
+            nn.Linear(in_features=40 * 2 * 2, out_features=60),
+            nn.Linear(in_features=60, out_features=15)
         )
 
         self.loss_criterion = nn.CrossEntropyLoss(reduction='mean')

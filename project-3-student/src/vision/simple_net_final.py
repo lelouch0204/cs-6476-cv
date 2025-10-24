@@ -28,11 +28,11 @@ class SimpleNetFinal(nn.Module):
             nn.BatchNorm2d(num_features=20),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3),
-            nn.Dropout(p=0.5),
             nn.Conv2d(in_channels=20, out_channels=40, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(num_features=40),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(p=0.5),
             nn.Flatten()
         )
 
