@@ -99,7 +99,7 @@ class PSPNet(nn.Module):
         
         fea_dim = 2048
         reduction_dim = fea_dim // len(bins)
-        self.ppm = PPM(in_feats=fea_dim, bins=bins, reduction_dim=reduction_dim)
+        self.ppm = PPM(in_dim=fea_dim, bins=bins, reduction_dim=reduction_dim)
         fea_dim = fea_dim + len(bins) * reduction_dim
 
         #######################################################################
@@ -241,8 +241,48 @@ class PSPNet(nn.Module):
         # TODO: YOUR CODE HERE                                                #
         #######################################################################
 
-        raise NotImplementedError('`forward()` function in ' +
-            '`part5_pspnet.py` needs to be implemented')
+        _, _, h, w = x.size()
+
+        target_h  = int((h - 1) / 8 * self.zoom_factor + 1)
+        target_w  = int((w - 1) / 8 * self.zoom_factor + 1)
+
+
+        x = self.layer0(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+
+        x_aux = self.aux(x)
+        aux_logits = F.interpolate(
+            x_aux,
+            size=(target_h, target_w),
+            mode='bilinear',
+            align_corners=False
+        )
+
+        x = self.layer4(x)
+        if self.use_ppm:
+            x = self.ppm(x)
+
+        logits = self.cls(x)
+        logits = F.interpolate(
+            logits,
+            size=(target_h, target_w),
+            mode='bilinear',
+            align_corners=False
+        )
+
+        yhat = torch.argmax(logits, dim=1)
+        main_loss = None
+        aux_loss = None
+
+        if y is not None:
+            main_loss = self.criterion(logits, y)
+
+            if self.training:
+                aux_loss = self.criterion(aux_logits, y)
+            else:
+                aux_loss = torch.tensor(0.0, device=logits.device)
 
         #######################################################################
         #                             END OF YOUR CODE                        #

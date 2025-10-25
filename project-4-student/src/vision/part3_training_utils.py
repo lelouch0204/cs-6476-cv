@@ -42,16 +42,16 @@ def get_model_and_optimizer(args) -> Tuple[nn.Module, torch.optim.Optimizer]:
             pretrained=args.pretrained,
         )
 
-        params_list.append(
-            {
-                "params": model.layer0.parameters() + model.layer1.parameters(),
-                "lr": args.base_lr,
-                "weight_decay": args.weight_decay,
-                "momentum": args.momentum,
-            }
-        )
+        # params_list.append(
+        #     {
+        #         "params": model.layer0.parameters() + model.layer1.parameters(),
+        #         "lr": args.base_lr,
+        #         "weight_decay": args.weight_decay,
+        #         "momentum": args.momentum,
+        #     }
+        # )
 
-        for i in range(2, 5):
+        for i in range(0, 5):
             params_list.append(
                 {
                     "params": getattr(model, f"layer{i}").parameters(),

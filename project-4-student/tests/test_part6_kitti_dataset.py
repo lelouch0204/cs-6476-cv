@@ -53,6 +53,8 @@ def test_model_kitti() -> None:
 
 	logits, yhat, main_loss, aux_loss = model(x, y)
 
+	# print(f"logits.shape: {logits.shape}, yhat.shape: {yhat.shape}, main_loss: {main_loss}, aux_loss: {aux_loss}")
+
 	assert logits.shape == (batch_size, 2, H, W)
 
 	# make sure that the output shape is correct

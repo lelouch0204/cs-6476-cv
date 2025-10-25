@@ -79,8 +79,41 @@ def model_and_optimizer(args, model) -> Tuple[nn.Module, torch.optim.Optimizer]:
     # TODO: YOUR CODE HERE                                                    #
     ###########################################################################
 
-    raise NotImplementedError('`model_and_optimizer()` function in ' +
-        '`part6_transfer_learning.py` needs to be implemented')
+    args.classes = 2  
+    new_model = PSPNet(
+        num_classes=2,
+        pretrained=False
+    )
+
+    pretrained_dict = model.state_dict()
+    new_model_dict = new_model.state_dict()
+
+    pretrained_dict = {k: v for k, v in pretrained_dict.items() 
+                      if k in new_model_dict and 'cls' not in k and 'aux' not in k}
+    
+    new_model_dict.update(pretrained_dict)
+    new_model.load_state_dict(new_model_dict)
+
+    backbone_params = []
+    classifier_params = []
+    
+    for name, param in new_model.named_parameters():
+        if 'cls' in name or 'aux' in name:
+            classifier_params.append(param)
+        else:
+            backbone_params.append(param)
+    
+    optimizer = torch.optim.SGD(
+        [
+            {'params': backbone_params, 'lr': args.base_lr},
+            {'params': classifier_params, 'lr': args.base_lr * 10}
+        ],
+        lr=args.base_lr,
+        momentum=args.momentum,
+        weight_decay=args.weight_decay
+    )
+
+    model = new_model
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
