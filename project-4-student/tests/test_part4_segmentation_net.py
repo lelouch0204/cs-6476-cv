@@ -76,6 +76,7 @@ def test_check_output_shapes_testtime():
     y = torch.ones(batch_size,H,W).type(torch.int64) * 255
 
     logits, yhat, main_loss, aux_loss = model(x)
+    print(logits.shape, yhat.shape)
 
     assert logits.shape == (batch_size, num_classes, H, W)
 

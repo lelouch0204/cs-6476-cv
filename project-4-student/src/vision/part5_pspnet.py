@@ -6,6 +6,7 @@ from torch import nn
 
 from src.vision.resnet import resnet50
 from src.vision.part1_ppm import PPM
+from src.vision.resnet import Bottleneck
 
 
 class PSPNet(nn.Module):
@@ -64,8 +65,23 @@ class PSPNet(nn.Module):
         # layer0, layer1, layer2, layer3, layer4. Note: layer0 should be sequential #
         #############################################################################
 
-        raise NotImplementedError('`__init__()` function in ' +
-            '`part5_pspnet.py` needs to be implemented')
+        resnet = resnet50(pretrained=pretrained, deep_base=deep_base)
+        self.layer0 = nn.Sequential(
+            resnet.conv1, 
+            resnet.bn1,
+            resnet.relu,
+            resnet.conv2,
+            resnet.bn2,
+            resnet.relu,
+            resnet.conv3,
+            resnet.bn3,
+            resnet.relu,
+            resnet.maxpool
+        )
+        self.layer1 = resnet.layer1
+        self.layer2 = resnet.layer2
+        self.layer3 = resnet.layer3
+        self.layer4 = resnet.layer4
 
         #######################################################################
         #                             END OF YOUR CODE                        #
@@ -80,9 +96,11 @@ class PSPNet(nn.Module):
         # Afterwards, set fea_dim to the updated feature dimension to be passed   #
         # to the classifier
         ###########################################################################
-
-        raise NotImplementedError('`__init__()` function in ' +
-            '`part5_pspnet.py` needs to be implemented')
+        
+        fea_dim = 2048
+        reduction_dim = fea_dim // len(bins)
+        self.ppm = PPM(in_feats=fea_dim, bins=bins, reduction_dim=reduction_dim)
+        fea_dim = fea_dim + len(bins) * reduction_dim
 
         #######################################################################
         #                             END OF YOUR CODE                        #
@@ -109,9 +127,29 @@ class PSPNet(nn.Module):
         # TODO: YOUR CODE HERE                                                #
         #######################################################################
 
-        raise NotImplementedError('`__replace_conv_with_dilated_conv()` ' +
-            'function in `part5_pspnet.py` needs to be implemented')
-
+        for name, module in self.layer3.named_modules():
+            if type(module) == Bottleneck:
+                if 'conv2' in name and type(module) == nn.Conv2d:
+                    module.conv2.stride = (1, 1)
+                    module.conv2.dilation = (2, 2)
+                    module.conv2.padding = (2, 2)
+                
+                if 'downsample' in name:
+                    for _, sub_module in module.named_modules():
+                        if type(sub_module) == nn.Conv2d:
+                            sub_module.stride = (1, 1)
+        
+        for name, module in self.layer4.named_modules():
+            if type(module) == Bottleneck:
+                if 'conv2' in name and type(module) == nn.Conv2d:
+                    module.conv2.stride = (1, 1)
+                    module.conv2.dilation = (4, 4)
+                    module.conv2.padding = (4, 4)
+                
+                if 'downsample' in name:
+                    for _, sub_module in module.named_modules():
+                        if type(sub_module) == nn.Conv2d:
+                            sub_module.stride = (1, 1)
         #######################################################################
         #                             END OF YOUR CODE                        #
         #######################################################################
@@ -140,8 +178,13 @@ class PSPNet(nn.Module):
         # TODO: YOUR CODE HERE                                                #
         #######################################################################
 
-        raise NotImplementedError('`__create_classifier()` function in ' +
-            '`part5_pspnet.py` needs to be implemented')
+        cls = nn.Sequential(
+            nn.Conv2d(in_feats, out_feats, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(out_feats),
+            nn.ReLU(inplace=True),
+            nn.Dropout2d(p=self.dropout),
+            nn.Conv2d(out_feats, num_classes, kernel_size=1)
+        )
 
         #######################################################################
         #                             END OF YOUR CODE                        #

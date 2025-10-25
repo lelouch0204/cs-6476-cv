@@ -35,16 +35,16 @@ def get_model_and_optimizer(args) -> Tuple[nn.Module, torch.optim.Optimizer]:
 
     params_list = []
 
-    if args.arch == "pspnet":
+    if args.arch == "PSPNet":
         model = PSPNet(
-            num_classes=args.num_classes,
+            num_classes=args.classes,
             zoom_factor=args.zoom_factor,
             pretrained=args.pretrained,
         )
 
         params_list.append(
             {
-                "params": model.backbone.layer0.parameters() + model.backbone.layer1.parameters(),
+                "params": model.layer0.parameters() + model.layer1.parameters(),
                 "lr": args.base_lr,
                 "weight_decay": args.weight_decay,
                 "momentum": args.momentum,
@@ -54,7 +54,7 @@ def get_model_and_optimizer(args) -> Tuple[nn.Module, torch.optim.Optimizer]:
         for i in range(2, 5):
             params_list.append(
                 {
-                    "params": getattr(model.backbone, f"layer{i}").parameters(),
+                    "params": getattr(model, f"layer{i}").parameters(),
                     "lr": args.base_lr,
                     "weight_decay": args.weight_decay,
                     "momentum": args.momentum,
@@ -78,12 +78,47 @@ def get_model_and_optimizer(args) -> Tuple[nn.Module, torch.optim.Optimizer]:
             )
 
         optimizer = torch.optim.SGD(params=params_list, lr=args.base_lr, momentum=args.momentum, weight_decay=args.weight_decay)
-    elif args.arch == "simple_segmentation_net":
+    elif args.arch == "SimpleSegmentationNet":
         model = SimpleSegmentationNet(
-            n_classes=args.num_classes,
-            backbone=args.backbone,
-            pretrained=True
+            num_classes=args.classes,
+            pretrained=args.pretrained
         )
+
+        params_list.append(
+            {
+                "params": model.layer0.parameters(),
+                "lr": args.base_lr,
+                "weight_decay": args.weight_decay,
+                "momentum": args.momentum,
+            }
+        )
+
+        for i in range(1, 5):
+            params_list.append(
+                {
+                    "params": getattr(model.resnet, f"layer{i}").parameters(),
+                    "lr": args.base_lr,
+                    "weight_decay": args.weight_decay,
+                    "momentum": args.momentum,
+                }
+            )
+
+        faster_lr_params = [
+            model.cls.parameters(),
+        ]
+
+        for param in faster_lr_params:
+            params_list.append(
+                {
+                    "params": param,
+                    "lr": args.base_lr * 10,
+                    "weight_decay": args.weight_decay,
+                    "momentum": args.momentum,
+                }
+            )
+        optimizer = torch.optim.SGD(params=params_list, lr=args.base_lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    else:
+        raise ValueError(f"Unknown architecture {args.arch}")
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
